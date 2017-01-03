@@ -24,7 +24,6 @@ setup(
     name="seep",
     packages=find_packages(),
     install_requires=["jsonschema"],
-    setup_requires=["vcversioner"],
     author="Julian Berman",
     author_email="Julian@GrayVines.com",
     classifiers=classifiers,
@@ -32,5 +31,4 @@ setup(
     license="MIT",
     long_description=long_description,
     url="https://github.com/Julian/Seep",
-    vcversioner={"version_module_paths" : ["seep/_version.py"]},
 )
