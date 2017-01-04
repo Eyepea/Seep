@@ -51,3 +51,18 @@ class TestInstantiate(TestCase):
     def test_validation_errors_are_still_errors(self):
         with self.assertRaises(jsonschema.ValidationError):
             seep.core.instantiate("foo", {"type" : "integer"})
+
+    def test_ref_in_schema(self):
+        data = {}
+        schema = {
+            "definitions": {
+                "foo": {
+                    "default": 123
+                }
+            },
+            "properties": {
+                "foo": {'$ref': '#/definitions/foo'}
+            }
+        }
+        seep.core.instantiate(data, schema)
+        self.assertEqual(data, {"foo": 123})

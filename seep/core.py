@@ -5,6 +5,13 @@ def _set_defaults(validator, properties, instance, schema):
     for property, subschema in properties.items():
         if "default" in subschema and property not in instance:
             instance[property] = subschema["default"]
+        elif "$ref" in subschema and property not in instance:
+            path = subschema['$ref'].split('/')
+            value = schema
+            for x in path[1:]:
+                value = value[x]
+            if "default" in value:
+                instance[property] = value["default"]
 
 
 DefaultSetter = jsonschema.validators.create(
