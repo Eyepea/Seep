@@ -1,10 +1,17 @@
 import jsonschema.validators
+from jsonschema.exceptions import ValidationError
 
 
 def _set_defaults(validator, properties, instance, schema):
     for property, subschema in properties.items():
-        if "default" in subschema and property not in instance:
+        if "default" in subschema and property not in instance\
+                and "required" not in subschema:
             instance[property] = subschema["default"]
+        elif "required" in subschema:
+            raise ValidationError(
+                message="'{}' is a required property".format(property),
+                validator=validator,
+                schema=schema)
 
 
 DefaultSetter = jsonschema.validators.create(
