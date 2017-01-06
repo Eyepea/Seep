@@ -47,11 +47,6 @@ def instantiate(data, blueprint):
 
 def _properties_with_defaults(validator_cls):
     def properties_with_defaults(validator, properties, instance, schema):
-        for error in validator_cls.VALIDATORS["properties"](
-            validator, properties, instance, schema
-        ):
-            yield error
-
         subschemas = [(instance, schema)]
         while subschemas:
             subinstance, subschema = subschemas.pop()
@@ -61,5 +56,10 @@ def _properties_with_defaults(validator_cls):
                 for property, subsubschema in
                 subschema.get("properties", {}).items()
             )
+
+        for error in validator_cls.VALIDATORS["properties"](
+            validator, properties, instance, schema
+        ):
+            yield error
 
     return properties_with_defaults
