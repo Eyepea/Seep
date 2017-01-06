@@ -21,6 +21,7 @@ def extend(validator_cls):
     Validator = jsonschema.validators.extend(
         validator_cls, {
             "properties" : _properties_with_defaults(validator_cls),
+            "required": _properties_required(validator_cls)
         }
     )
 
@@ -54,12 +55,35 @@ def _properties_with_defaults(validator_cls):
 
         subschemas = [(instance, schema)]
         while subschemas:
+            to_del = [key for key, value in instance.items() if
+                      isinstance(value, SeepDict)]
+            for key in to_del:
+                del instance[key]
             subinstance, subschema = subschemas.pop()
             DefaultSetter(subschema).validate(subinstance)
-            subschemas.extend(
-                (subinstance.setdefault(property, {}), subsubschema)
-                for property, subsubschema in
-                subschema.get("properties", {}).items()
-            )
+            subschemas.extend((subinstance.setdefault(property,
+                                                      SeepDict()),
+                               subsubschema) for property, subsubschema
+                              in subschema.get("properties", {}).items())
 
     return properties_with_defaults
+
+
+def _properties_required(validator_cls):
+    def properties_required(validator, properties, instance, schema):
+
+        subschemas = [(instance, schema)]
+        while subschemas:
+            subinstance, subschema = subschemas.pop()
+            for property in properties:
+                DefaultSetter(subschema).validate(subinstance)
+            for error in validator_cls.VALIDATORS["required"](
+                    validator, properties, instance, schema
+            ):
+                yield error
+
+    return properties_required
+
+
+class SeepDict(dict):
+    pass
